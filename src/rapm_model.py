@@ -142,7 +142,7 @@ def compare_to_published(season: int, ratings: pd.DataFrame) -> pd.DataFrame:
 
     ratings_xw = ratings.merge(crosswalk, left_on="athlete_id", right_on="espn_athlete_id")
     merged = ratings_xw.merge(
-        published[["player_id", "player_name", "rapm", "o_rapm", "d_rapm"]],
+        published[["player_id", "rapm", "o_rapm", "d_rapm"]],
         left_on="wnba_player_id",
         right_on="player_id",
         suffixes=("_mine", "_published"),
