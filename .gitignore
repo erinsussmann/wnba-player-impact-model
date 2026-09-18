@@ -2,7 +2,9 @@
 __pycache__/
 *.pyc
 data/raw/
-data/processed/
+data/processed/*
+!data/processed/rapm_ratings_2025.parquet
+!data/processed/rapm_validation_2025.parquet
 .ipynb_checkpoints/
 .DS_Store
 .claude/

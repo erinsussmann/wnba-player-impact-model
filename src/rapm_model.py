@@ -134,7 +134,11 @@ def load_player_crosswalk() -> pd.DataFrame:
     return df
 
 
-def compare_to_published(season: int, ratings: pd.DataFrame) -> pd.DataFrame:
+def compare_to_published(season: int, ratings: pd.DataFrame, force: bool = False) -> pd.DataFrame:
+    out_path = PROCESSED_DIR / f"rapm_validation_{season}.parquet"
+    if out_path.exists() and not force:
+        return pd.read_parquet(out_path)
+
     published = load_published_ratings(season)
     crosswalk = load_player_crosswalk()[["espn_athlete_id", "wnba_player_id"]].dropna()
     crosswalk["espn_athlete_id"] = crosswalk["espn_athlete_id"].astype(float)
@@ -155,7 +159,6 @@ def compare_to_published(season: int, ratings: pd.DataFrame) -> pd.DataFrame:
     print(f"[validation] Pearson corr (rapm): {corr:.3f}")
     print(f"[validation] Spearman rank corr: {rank_corr:.3f}")
 
-    out_path = PROCESSED_DIR / f"rapm_validation_{season}.parquet"
     merged.to_parquet(out_path)
     print(f"[saved] validation comparison table -> {out_path}")
     return merged

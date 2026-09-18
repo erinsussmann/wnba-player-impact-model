@@ -43,6 +43,7 @@ player_options = [
 ]
 
 app = dash.Dash(__name__)
+server = app.server  # exposed for gunicorn (`gunicorn dashboard.app:server`)
 app.title = "WNBA Player Impact"
 app.index_string = """<!DOCTYPE html>
 <html>
@@ -186,4 +187,6 @@ def update_validation_chart(_):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    import os
+
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8050)))
