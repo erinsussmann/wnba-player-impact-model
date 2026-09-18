@@ -71,6 +71,13 @@ def fit_rapm(season: int, force: bool = False) -> pd.DataFrame:
     def_poss = np.asarray((X < 0).sum(axis=0)).ravel()
 
     player_box = pd.read_parquet(RAW_DIR / f"player_box_{season}.parquet")
+    team_box = pd.read_parquet(RAW_DIR / f"team_box_{season}.parquet")
+    # Exclude exhibition teams (e.g. All-Star Game draft teams) so a
+    # player's displayed team isn't overwritten by a one-off appearance --
+    # see the matching filter and comment in possessions.build_possessions.
+    games_played = team_box.groupby("team_id")["game_id"].nunique()
+    real_teams = set(games_played[games_played >= 10].index)
+    player_box = player_box[player_box["team_id"].isin(real_teams)]
     name_map = (
         player_box.sort_values("game_id")
         .groupby("athlete_id")

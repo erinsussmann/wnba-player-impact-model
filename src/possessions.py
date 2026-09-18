@@ -196,6 +196,21 @@ def build_possessions(season: int, force: bool = False) -> pd.DataFrame:
 
     pbp = pd.read_parquet(RAW_DIR / f"pbp_{season}.parquet")
     player_box = pd.read_parquet(RAW_DIR / f"player_box_{season}.parquet")
+    team_box = pd.read_parquet(RAW_DIR / f"team_box_{season}.parquet")
+
+    # Exclude exhibitions (e.g. the All-Star Game, played by ad-hoc draft
+    # teams like "TEAM CLARK") -- a real franchise plays dozens of games a
+    # season, so a low games-played count reliably flags a one-off team
+    # without hardcoding IDs or names that could change season to season.
+    games_played = team_box.groupby("team_id")["game_id"].nunique()
+    real_teams = set(games_played[games_played >= 10].index)
+    exhibition_games = set(
+        team_box.loc[~team_box["team_id"].isin(real_teams), "game_id"]
+    )
+    if exhibition_games:
+        print(f"[excluded] {len(exhibition_games)} exhibition game(s) (e.g. All-Star Game)")
+        pbp = pbp[~pbp["game_id"].isin(exhibition_games)]
+        player_box = player_box[~player_box["game_id"].isin(exhibition_games)]
 
     all_possessions = []
     excluded_games = []
